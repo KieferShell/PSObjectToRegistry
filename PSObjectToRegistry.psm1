@@ -32,16 +32,16 @@ function Add-PSObjectToRegistry {
 
     Writing to HKLM requires an elevated (Administrator) session.
 
-.PARAMETER RootKeyName
+.PARAMETER KeyName
     The name of the top-level key to create or target under the hive's SOFTWARE key.
     For example, a value of 'MyApp' resolves to HKLM:\SOFTWARE\MyApp.
 
 .PARAMETER SubKeyNames
-    An optional ordered array of subkey names representing the path beneath RootKeyName
+    An optional ordered array of subkey names representing the path beneath KeyName
     where data will be written. For example, passing @('Config', 'Network') resolves
     to HKLM:\SOFTWARE\MyApp\Config\Network.
 
-    Defaults to an empty array, writing directly under RootKeyName.
+    Defaults to an empty array, writing directly under KeyName.
 
 .PARAMETER UseFirstPropertyAsKey
     When specified, the value of each object's first property is used as the subkey
@@ -81,7 +81,7 @@ function Add-PSObjectToRegistry {
 
 .EXAMPLE
     [PSCustomObject]@{ Theme = 'Dark'; FontSize = 14; AutoSave = $true } |
-        Add-PSObjectToRegistry -Hive HKCU -RootKeyName MyApp
+        Add-PSObjectToRegistry -Hive HKCU -KeyName MyApp
 
     Writes a single object's properties directly to HKCU:\SOFTWARE\MyApp. No subkey
     is created because only one object was piped and -UseFirstPropertyAsKey was not
@@ -89,14 +89,14 @@ function Add-PSObjectToRegistry {
 
 .EXAMPLE
     Get-Service | Select-Object Name, DisplayName, Status |
-        Add-PSObjectToRegistry -Hive HKLM -RootKeyName MyApp -SubKeyNames @('Services') -UseFirstPropertyAsKey
+        Add-PSObjectToRegistry -Hive HKLM -KeyName MyApp -SubKeyNames @('Services') -UseFirstPropertyAsKey
 
     Writes each service object to a subkey named after its Name property, e.g.
     HKLM:\SOFTWARE\MyApp\Services\Spooler, HKLM:\SOFTWARE\MyApp\Services\WinRM, etc.
 
 .EXAMPLE
     Get-Service | Select-Object Name, DisplayName, Status |
-        Add-PSObjectToRegistry -Hive HKLM -RootKeyName MyApp -SubKeyNames @('Services') `
+        Add-PSObjectToRegistry -Hive HKLM -KeyName MyApp -SubKeyNames @('Services') `
             -UseFirstPropertyAsKey -EnsureUniqueness
 
     Same as the previous example, but if any two services share the same Name value,
@@ -105,14 +105,14 @@ function Add-PSObjectToRegistry {
 
 .EXAMPLE
     $data = Import-Csv .\Items.csv
-    $data | Add-PSObjectToRegistry -Hive HKLM -RootKeyName MyApp -SubKeyNames @('Items') -UseLeadingZeros
+    $data | Add-PSObjectToRegistry -Hive HKLM -KeyName MyApp -SubKeyNames @('Items') -UseLeadingZeros
 
     Imports a CSV and writes each row to a zero-padded numeric subkey. With 42 rows,
     keys will be named 00 through 41, ensuring consistent sort order.
 
 .EXAMPLE
     Get-Process | Select-Object Name, Id, CPU |
-        Add-PSObjectToRegistry -Hive HKLM -RootKeyName MyApp -WhatIf
+        Add-PSObjectToRegistry -Hive HKLM -KeyName MyApp -WhatIf
 
     Previews all registry operations without writing any data. Use this to validate
     the target path and key structure before committing changes.
